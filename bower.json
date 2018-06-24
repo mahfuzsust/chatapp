@@ -1,0 +1,22 @@
+{
+  "name": "chatapp",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Mahfuzur Rahman <mahfuzsust@yahoo.com> (http://www.mahfuz.info)"
+  ],
+  "license": "ISC",
+  "homepage": "http://www.mahfuz.info",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "bootstrap": "^4.1.1",
+    "socket-io-client": "^1.4.5"
+  }
+}

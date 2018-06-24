@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Creating a Chat Application in Node JS with Express, MongoDB, Mongoose and Socket.io</title>
+        <link rel="stylesheet" href="./lib/bootstrap/dist/css/bootstrap.min.css" crossorigin="anonymous">
+        <link rel="stylesheet" href="./css/main.css" crossorigin="anonymous">
+
+        <script src="./lib/jquery/dist/jquery.min.js" crossorigin="anonymous"></script>
+        <script src="./lib/socket-io-client/socket.io.js" crossorigin="anonymous"></script>
+        <script src="./lib/socket-io-client/socket.io.js" crossorigin="anonymous"></script>
+        <script src="./js/login.js" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="container">
+            <br>
+            <div class="jumbotron">
+                <h1 class="dispaly-4">Login</h1>
+                <br>
+                <h4 id="error" class="dispaly-4"></h4>
+                <br>
+                <input id="username" class="form-control" placeholder="Username" type="text">
+                <br>
+                <input id="password" type="password" placeholder="Password" class="form-control">
+                <br>
+                <a id="signup" href="/signup">Join</a>
+                <br>
+                <button id="login" class="btn btn-success">Login</button>
+            </div>
+            <div id="messages"></div>
+        </div>
+    </body>
+</html>
