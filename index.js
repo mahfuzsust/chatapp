@@ -8,6 +8,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var config = require("./config");
 var jwt = require('jsonwebtoken');
+var async = require("async");
 var app = express();
 var http = require("http").Server(app)
 var io= require("socket.io")(http)
@@ -131,8 +132,7 @@ app.get("/users", async (req, res) => {
     if(!isAuthenticated(req)) {
         res.redirect('/login');
         return;
-    } 
-    console.log(req.headers['x-access-token']);
+    }
 
     try {
         var query = require('url').parse(req.url,true).query;
@@ -162,22 +162,36 @@ app.get("/connections", async (req, res) => {
         res.redirect('/login');
     } 
 
-    
-    
     try {
-        mmodel.Connection.find({
-            $and: [
-                {
+        model.Connection.find({
+            //$and: [
+                //{
                     $or: [
                         { requestedBy: req.userId },
                         { connection: req.userId }
                     ]
-                },
-                { isAccepted : true}
-            ]
-        }).exec(function(err, usrs){
+                //},
+                //{ isAccepted : true}
+            //]
+        })
+        .populate('requestedBy', '-password -created -v')
+        .populate('connection', '-password -created -v')
+        .exec(function(err, usrs){
             if(err) throw err;
-            return users;
+
+            var arr= [];
+            
+            async.each(usrs, function(user, callback) {
+                if(user.requestedBy.id == req.usereId) {
+                    arr.push({id: user.connection.id, name: user.connection.username});
+                } else {
+                    arr.push({id: user.requestedBy.id, name: user.requestedBy.username});
+                }
+              }, function(err){
+            });
+
+            console.log(arr);
+            res.send({data: arr});
         });
 
     } catch (error) {

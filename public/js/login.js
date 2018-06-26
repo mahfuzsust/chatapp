@@ -6,8 +6,6 @@ $(() => {
         login(loginInfo)
     });
     function login(loginInfo) {
-        console.log(loginInfo);
-        
         $.post("http://localhost:3000/login", loginInfo, function( data, status ) {
             localStorage['token'] = data;
             if(status == "success") {

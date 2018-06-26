@@ -13,7 +13,8 @@ $(() => {
             };
         },
         onSelect: function (suggestion) {
-            alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
+            $.post("/connect", {connectionId: suggestion.data});
+            //alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
         }
     })
     $("#send").click(() => {
@@ -37,4 +38,22 @@ $(() => {
         $("#messages").append(`<h5>${chatObj.name} </h5><p>${chatObj.chat}</p>`);
     }
     getChats();
+
+    var addConnection = function(obj) {
+        var item = $(`<h5 id=${obj.id} class="connection">${obj.name} </h5>`);
+        item.click(function(e){
+            console.log(e.target.id);
+        });
+        $("#connectedUsers").append(item);
+    };
+
+    var getConnections = function() {
+        $.get("/connections", (connections) => {
+            connections.data.forEach((connection) => {
+                addConnection(connection);
+            });
+        })
+    };
+
+    getConnections();
 })
