@@ -10,6 +10,18 @@
         <script src="./lib/socket-io-client/socket.io.js" crossorigin="anonymous"></script>
         <script src="./lib/socket-io-client/socket.io.js" crossorigin="anonymous"></script>
         <script src="./js/jquery.autocomplete.min.js" crossorigin="anonymous"></script>
+
+        <script>
+             $(function () {
+                var token = localStorage['token'];
+                $(document).ajaxSend(function(e, xhr, options) {
+                    console.log("ajax token!!!" + token);
+                    xhr.setRequestHeader('x-access-token', token);
+                });
+            });
+                    
+        </script>
+
         <script src="./js/main.js" crossorigin="anonymous"></script>
     </head>
     <body>

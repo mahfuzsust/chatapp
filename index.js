@@ -34,14 +34,18 @@ app.use(session({
 connectDB();
 
 var isAuthenticated = function(req) {
-    var token = req.session.accessToken || req.body.token || req.query.token || req.headers['x-access-token'];
+    var token = req.session.accessToken || req.headers['x-access-token'];
     if (token) {
         const checkDecoded = function (err, decoded) {
             if (err) {
                 return false;
             }
             else {
-                req.userId = decoded.data.userId;
+                if(decoded && decoded.data && decoded.data.userId)
+                {
+                    req.userId = decoded.data.userId;
+                    
+                }
                 return true;
             }
         };
@@ -80,9 +84,10 @@ app.post("/login", (req, res) => {
                 data: {userId: user._id}
             }, app.get("secret") , { expiresIn: 60 * 60 });   
             
+            req.headers['x-access-token'] = token;
             req.session.accessToken = token;
-            //res.redirect('/dashboard');
-            res.sendStatus(200);
+            res.send(token);
+            //res.sendStatus(200);
         }
     });
 });
@@ -127,11 +132,11 @@ app.get("/users", async (req, res) => {
         res.redirect('/login');
         return;
     } 
+    console.log(req.headers['x-access-token']);
+
     try {
         var query = require('url').parse(req.url,true).query;
         var searchString = query.searchString;
-
-        console.log(req);
         
         var ObjectID = require('mongodb').ObjectID;
 
@@ -156,6 +161,8 @@ app.get("/connections", async (req, res) => {
     if(!isAuthenticated(req)) {
         res.redirect('/login');
     } 
+
+    
     
     try {
         mmodel.Connection.find({
