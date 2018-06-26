@@ -7,10 +7,10 @@ var User = mongoose.model("User", {
     updated: { type: Date }
 });
 
-var ConnectedUser = mongoose.model("ConnectedUser", {
+var Connection = mongoose.model("Connection", {
     requestedBy: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     connection: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-    isAccepted: {type: boolean, default: false},
+    isAccepted: {type: Boolean, default: false},
     accepted: {type: Date },
     requested: {type: Date, default: Date.now}
 });
@@ -43,4 +43,4 @@ exports.User = User;
 exports.Chat = Chat;
 exports.Room = Room;
 exports.Participant = Participant;
-exports.ConnectedUser = ConnectedUser;
+exports.Connection = Connection;

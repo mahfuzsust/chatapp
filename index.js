@@ -38,11 +38,10 @@ var isAuthenticated = function(req) {
     if (token) {
         const checkDecoded = function (err, decoded) {
             if (err) {
-                console.log(err);
                 return false;
             }
             else {
-                req.userId = decoded;
+                req.userId = decoded.data.userId;
                 return true;
             }
         };
@@ -105,14 +104,47 @@ app.post("/signup", (req, res) => {
     }
 });
 
-app.get("/users", async (req, res) => {
+app.post("/connect", (req, res) => {
     if(!isAuthenticated(req)) {
         res.redirect('/login');
     } 
     try {
-        mmodel.User.find({username: '/^' + req.param.username + '/'}, function(err, users) {
+        var connection = {
+            requestedBy: req.userId,
+            connection: req.body.connectionId,
+        };
+        var connect = new model.Connection(connection)
+        connect.save()
+        res.sendStatus(200)
+    } catch (error) {
+        res.sendStatus(500)
+        console.error(error)
+    }
+});
+
+app.get("/users", async (req, res) => {
+    if(!isAuthenticated(req)) {
+        res.redirect('/login');
+        return;
+    } 
+    try {
+        var query = require('url').parse(req.url,true).query;
+        var searchString = query.searchString;
+
+        console.log(req);
+        
+        var ObjectID = require('mongodb').ObjectID;
+
+        var userId = new ObjectID(req.userId);
+        
+        model.User.find(
+            {
+                "username" : { $regex: searchString, $options: 'i' },
+                "_id" : {$ne: userId} 
+            }
+        ).select('username').exec(function(err, users) {
             if(err) throw err;
-            return users;
+            res.send({data: users});
         });
     } catch (error) {
         res.sendStatus(500)
@@ -120,13 +152,13 @@ app.get("/users", async (req, res) => {
     }
 });
 
-app.get("/connectedUsers", async (req, res) => {
+app.get("/connections", async (req, res) => {
     if(!isAuthenticated(req)) {
         res.redirect('/login');
     } 
     
     try {
-        mmodel.ConnectedUser.find({
+        mmodel.Connection.find({
             $and: [
                 {
                     $or: [

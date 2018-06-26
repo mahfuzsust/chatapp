@@ -1,6 +1,21 @@
 $(() => {
     var socket = io()
-    socket.on("chat", addChat)
+    socket.on("chat", addChat);
+    $('#autocomplete').autocomplete({
+        serviceUrl: '/users',
+        paramName: 'searchString',
+        transformResult: function(response) {
+            var responseData = $.parseJSON(response);
+            return {
+                suggestions: $.map(responseData.data, function(dataItem) {
+                    return { value: dataItem.username, data: dataItem._id };
+                })
+            };
+        },
+        onSelect: function (suggestion) {
+            alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
+        }
+    })
     $("#send").click(() => {
         var chatMessage = {
             name: $("#txtName").val(), chat: $("#txtMessage").val()
@@ -9,7 +24,7 @@ $(() => {
     });
     
     function postChat(chat) {
-        $.post("http://localhost:3000/chats", chat)
+        $.post("/chats", chat)
     }
     function getChats() {
         $.get("/chats", (chats) => {
@@ -19,7 +34,6 @@ $(() => {
         })
     }
     function addChat(chatObj){
-        console.log(chatObj);
         $("#messages").append(`<h5>${chatObj.name} </h5><p>${chatObj.chat}</p>`);
     }
     getChats();
