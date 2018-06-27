@@ -13,10 +13,8 @@
 
         <script>
              $(function () {
-                var token = localStorage['token'];
                 $(document).ajaxSend(function(e, xhr, options) {
-                    console.log("ajax token!!!" + token);
-                    xhr.setRequestHeader('x-access-token', token);
+                    xhr.setRequestHeader('x-access-token', localStorage['token']);
                 });
             });
                     
@@ -54,9 +52,8 @@
                     </div>
                     <div id="messages" style="display: none;"></div>
                     
-                    <div id="commenting" style="display: none">
+                    <div id="commenting" style="display: none" class="bottom">
                         <textarea id="txtMessage" class="form-control" placeholder="Message"></textarea>
-                        <br>
                         <button id="send" class="btn btn-success">Send</button>
                     </div>
                 </div>

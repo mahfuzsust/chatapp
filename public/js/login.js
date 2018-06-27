@@ -7,7 +7,9 @@ $(() => {
     });
     function login(loginInfo) {
         $.post("http://localhost:3000/login", loginInfo, function( data, status ) {
-            localStorage['token'] = data;
+            localStorage['token'] = data.token;
+            localStorage['userId'] = data.userId;
+            
             if(status == "success") {
                 location.href = "/";
             } else {

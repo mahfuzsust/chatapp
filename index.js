@@ -87,7 +87,7 @@ app.post("/login", (req, res) => {
             
             req.headers['x-access-token'] = token;
             req.session.accessToken = token;
-            res.send(token);
+            res.send({token: token, userId: user._id});
             //res.sendStatus(200);
         }
     });

@@ -26,7 +26,7 @@ $(() => {
             $.post("/connect", {connectionId: suggestion.data});
             //alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
         }
-    })
+    });
     $("#send").click(() => {
         var chatMessage = {
             name: $("#txtName").val(), chat: $("#txtMessage").val(), connection: connectionId
@@ -39,7 +39,11 @@ $(() => {
     }
 
     function addChat(chatObj){
-        $("#messages").append(`<h5>${chatObj.name} </h5><p>${chatObj.chat}</p>`);
+        if(chatObj.user == localStorage['userId']){
+            $("#messages").append(`<div class="right"><p>${chatObj.chat}</p></div>`);
+        } else {
+            $("#messages").append(`<div class="left"><p>${chatObj.chat}</p></div>`);
+        }
     }
 
     function getMessages(roomId) {
