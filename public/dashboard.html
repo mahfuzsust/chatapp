@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Creating a Chat Application in Node JS with Express, MongoDB, Mongoose and Socket.io</title>
+        <title>Secured chate application</title>
         <link rel="stylesheet" href="./lib/bootstrap/dist/css/bootstrap.min.css" crossorigin="anonymous">
         <link rel="stylesheet" href="./css/main.css" crossorigin="anonymous">
 
@@ -14,10 +14,10 @@
         <script>
              $(function () {
                 $(document).ajaxSend(function(e, xhr, options) {
+                    console.log(localStorage['token']);
                     xhr.setRequestHeader('x-access-token', localStorage['token']);
                 });
             });
-                    
         </script>
 
         <script src="./js/main.js" crossorigin="anonymous"></script>
@@ -31,7 +31,7 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                         <div class="navbar-nav">
-                        <!-- <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a> -->
+                        <a class="nav-item nav-link right" href="/" id="logout">Logout <span class="sr-only">(current)</span></a> 
                         <!-- <a class="nav-item nav-link" href="#">Features</a>
                         <a class="nav-item nav-link" href="#">Pricing</a>
                         <a class="nav-item nav-link disabled" href="#">Disabled</a> -->

@@ -27,6 +27,12 @@ $(() => {
             //alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
         }
     });
+    $("#logout").click(() => {
+        localStorage['userId'] = null;
+        localStorage['token'] = null;
+
+        $.get("/logout");
+    });
     $("#send").click(() => {
         var chatMessage = {
             name: $("#txtName").val(), chat: $("#txtMessage").val(), connection: connectionId

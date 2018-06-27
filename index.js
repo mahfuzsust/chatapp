@@ -25,19 +25,19 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.use(cookieParser(app.get('secret')));
-app.use(cookieEncrypter(app.get('secret')));
-app.use(session({
-    secret: app.get('secret'),
-    name: "chat_app",
-    proxy: true,
-    resave: true,
-    saveUninitialized: true
-}));
+//app.use(cookieEncrypter(app.get('secret')));
+// app.use(session({
+//     secret: app.get('secret'),
+//     name: "chat_app",
+//     proxy: true,
+//     resave: true,
+//     saveUninitialized: true
+// }));
 
 connectDB();
 
 var isAuthenticated = function(req) {
-    var token = req.session.accessToken || req.headers['x-access-token'];
+    var token = req.headers['x-access-token'] || req.cookies['chat_app_token'];
     if (token) {
         const checkDecoded = function (err, decoded) {
             if (err) {
@@ -67,6 +67,12 @@ app.get("/", (req, res) => {
         res.redirect('/login');
     }
 });
+
+app.get("/logout", (req, res) => {
+    res.clearCookie('chat_app_token');
+    res.redirect('/login');
+});
+
 app.get("/login", (req, res) => {
     if(isAuthenticated(req)) {
         res.redirect('/');
@@ -90,7 +96,8 @@ app.post("/login", (req, res) => {
                     }, app.get("secret") , { expiresIn: 60 * 60 });   
                     
                     req.headers['x-access-token'] = token;
-                    req.session.accessToken = token;
+                    //req.session.accessToken = token;
+                    res.cookie('chat_app_token', token, { maxAge: 900000, httpOnly: true });
                     res.send({token: token, userId: user._id});
                 }
             });
@@ -175,15 +182,10 @@ app.get("/connections", async (req, res) => {
 
     try {
         model.Connection.find({
-            //$and: [
-                //{
-                    $or: [
-                        { requestedBy: req.userId },
-                        { connection: req.userId }
-                    ]
-                //},
-                //{ isAccepted : true}
-            //]
+            $or: [
+                { requestedBy: req.userId },
+                { connection: req.userId }
+            ]
         })
         .populate('requestedBy', '-password -created -v')
         .populate('connection', '-password -created -v')
