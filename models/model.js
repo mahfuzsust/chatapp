@@ -33,9 +33,10 @@ var Participant = mongoose.model("Participant", {
 var Chat = mongoose.model("Chat", {
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     chat: String,
-    room: {type: mongoose.Schema.Types.ObjectId, ref: 'Room'},
+    connection: {type: mongoose.Schema.Types.ObjectId, ref: 'Connection'},
     updated: { type: Date },
-    created: { type: Date, default: Date.now, index: {expires: 60} }
+    created: { type: Date, default: Date.now, index: {expires: '3d'} },
+    deleted: { type: Date }
 });
 
 

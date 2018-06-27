@@ -178,19 +178,26 @@ app.get("/connections", async (req, res) => {
         .populate('connection', '-password -created -v')
         .exec(function(err, usrs){
             if(err) throw err;
-
             var arr= [];
             
             async.each(usrs, function(user, callback) {
+                let userId, userName;
                 if(user.requestedBy.id == req.usereId) {
-                    arr.push({id: user.connection.id, name: user.connection.username});
+                    userId = user.connection.id;
+                    userName = user.connection.username;
                 } else {
-                    arr.push({id: user.requestedBy.id, name: user.requestedBy.username});
+                    userId = user.requestedBy.id;
+                    userName = user.requestedBy.username;
                 }
+                arr.push({
+                    roomId: user.id,
+                    isAccepted: user.isAccepted,
+                    userId: userId,
+                    name: userName
+                });
               }, function(err){
             });
 
-            console.log(arr);
             res.send({data: arr});
         });
 
@@ -201,19 +208,33 @@ app.get("/connections", async (req, res) => {
 });
 
 app.post("/chats", async (req, res) => {
+    if(!isAuthenticated(req)) {
+        res.redirect('/login');
+    } 
+
     try {
-        var chat = new model.Chat(req.body)
-        await chat.save()
+        var chatObj = {
+            user: req.userId,
+            chat: req.body.chat,
+            connection: req.body.connection
+        };
+
+        var chat = new model.Chat(chatObj);
+        await chat.save();
         res.sendStatus(200)
 
-        io.emit("chat", req.body)
+        io.emit("chat:" + req.body.connection, chatObj)
     } catch (error) {
         res.sendStatus(500)
         console.error(error)
     }
 });
-app.get("/chats", (req, res) => {
-    model.Chat.find({}, (error, chats) => {
+
+app.get("/messages/:roomId", (req, res) => {
+    if(!isAuthenticated(req)) {
+        res.redirect('/login');
+    }
+    model.Chat.find({connection: req.params.roomId}, (error, chats) => {
         res.send(chats)
     });
 });

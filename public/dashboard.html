@@ -46,10 +46,19 @@
                     <div id="connectedUsers"></div>
                 </div>
                 <div class="col-sm-8">
-                    <div id="messages"></div>
-                    <textarea id="txtMessage" class="form-control" placeholder="Message"></textarea>
-                    <br>
-                    <button id="send" class="btn btn-success">Send</button>
+                    <div id="empty_chat" style="display: block;">
+                        No messages to show
+                    </div>
+                    <div id="not_accepted" style="display: none;">
+                        Please <a href="javascript:void(0)" id="accept_chat">accept</a> or <a href="javascript:void(0)" id="reject_chat">reject</a>
+                    </div>
+                    <div id="messages" style="display: none;"></div>
+                    
+                    <div id="commenting" style="display: none">
+                        <textarea id="txtMessage" class="form-control" placeholder="Message"></textarea>
+                        <br>
+                        <button id="send" class="btn btn-success">Send</button>
+                    </div>
                 </div>
             </div>
         </div>

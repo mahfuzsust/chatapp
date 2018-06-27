@@ -1,6 +1,16 @@
 $(() => {
-    var socket = io()
-    socket.on("chat", addChat);
+    var connectionId;
+    var roomUsers = {};
+
+    var setRoomUsers = function(data) {
+        data.forEach((connection) => {
+            roomUsers[connection.roomId] = connection
+        });
+    };
+
+
+    var socket = io();
+    
     $('#autocomplete').autocomplete({
         serviceUrl: '/users',
         paramName: 'searchString',
@@ -19,7 +29,7 @@ $(() => {
     })
     $("#send").click(() => {
         var chatMessage = {
-            name: $("#txtName").val(), chat: $("#txtMessage").val()
+            name: $("#txtName").val(), chat: $("#txtMessage").val(), connection: connectionId
         }
         postChat(chatMessage)
     });
@@ -27,28 +37,47 @@ $(() => {
     function postChat(chat) {
         $.post("/chats", chat)
     }
-    function getChats() {
-        $.get("/chats", (chats) => {
-            chats.forEach((chat) => {
-                addChat(chat);
-            });
-        })
-    }
+
     function addChat(chatObj){
         $("#messages").append(`<h5>${chatObj.name} </h5><p>${chatObj.chat}</p>`);
     }
-    getChats();
+
+    function getMessages(roomId) {
+        $.get("/messages/" + roomId, (chats) => {
+            if(chats.length > 0) {
+                $("#empty_chat").hide();
+                
+                chats.forEach((chat) => {
+                    addChat(chat);
+                });
+            } 
+        })
+    }
+
+    var clickConnection = function(e) {
+        var roomId = e.target.id;
+        var connection = roomUsers[roomId];
+        connectionId = roomId;
+        if(!connection.isAccepted) {
+            $("#empty_chat").hide();
+            $("#not_accepted").show();
+        } else {
+            socket.on("chat:" + roomId, addChat);
+            $("#commenting").show();
+            $("#messages").show();
+            getMessages(connectionId);
+        }
+    };
 
     var addConnection = function(obj) {
-        var item = $(`<h5 id=${obj.id} class="connection">${obj.name} </h5>`);
-        item.click(function(e){
-            console.log(e.target.id);
-        });
+        var item = $(`<h5 id=${obj.roomId} class="connection">${obj.name} </h5>`);
+        item.click(clickConnection);
         $("#connectedUsers").append(item);
     };
 
     var getConnections = function() {
         $.get("/connections", (connections) => {
+            setRoomUsers(connections.data);
             connections.data.forEach((connection) => {
                 addConnection(connection);
             });
