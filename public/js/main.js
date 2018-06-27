@@ -50,11 +50,13 @@ $(() => {
         $.get("/messages/" + roomId, (chats) => {
             if(chats.length > 0) {
                 $("#empty_chat").hide();
-                
+                $("#messages").empty();
                 chats.forEach((chat) => {
                     addChat(chat);
                 });
-            } 
+            } else {
+                $("#empty_chat").show();
+            }
         })
     }
 

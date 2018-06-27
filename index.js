@@ -1,5 +1,6 @@
 var express = require("express");
 var path = require("path");
+var bcrypt = require('bcryptjs');
 var mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const model = require("./models/model");
@@ -9,6 +10,7 @@ var session = require('express-session');
 var config = require("./config");
 var jwt = require('jsonwebtoken');
 var async = require("async");
+var ObjectID = require('mongodb').ObjectID;
 var app = express();
 var http = require("http").Server(app)
 var io= require("socket.io")(http)
@@ -78,17 +80,20 @@ app.post("/login", (req, res) => {
         if(!user) {
             res.status(400).json({ success: false, message: 'Authentication failed. User not found.' });
         } else {
-            if(user.password != req.body.password) {
-                res.status(400).json({ success: false, message: 'Password do not match' });            
-            }
-            var token = jwt.sign({
-                data: {userId: user._id}
-            }, app.get("secret") , { expiresIn: 60 * 60 });   
-            
-            req.headers['x-access-token'] = token;
-            req.session.accessToken = token;
-            res.send({token: token, userId: user._id});
-            //res.sendStatus(200);
+            bcrypt.compare(req.body.password, user.password, function(err, isMatched) {
+                if(isMatched == false) {
+                    res.status(400).json({ success: false, message: 'Password do not match' });
+                    return;
+                } else {
+                    var token = jwt.sign({
+                        data: {userId: user._id}
+                    }, app.get("secret") , { expiresIn: 60 * 60 });   
+                    
+                    req.headers['x-access-token'] = token;
+                    req.session.accessToken = token;
+                    res.send({token: token, userId: user._id});
+                }
+            });
         }
     });
 });
@@ -101,9 +106,17 @@ app.get("/signup", (req, res) => {
 });
 app.post("/signup", (req, res) => {
     try {
-        var user = new model.User(req.body)
-        user.save()
-        res.sendStatus(200)
+        var info = {
+            username: req.body.username
+        }
+        bcrypt.genSalt(10, function(err, salt) {
+            bcrypt.hash(req.body.password, salt, function(err, hash) {
+                info["password"] = hash;
+                var user = new model.User(info);
+                user.save();
+                res.sendStatus(200);
+            });
+        });
     } catch (error) {
         res.sendStatus(500)
         console.error(error)
@@ -137,8 +150,6 @@ app.get("/users", async (req, res) => {
     try {
         var query = require('url').parse(req.url,true).query;
         var searchString = query.searchString;
-        
-        var ObjectID = require('mongodb').ObjectID;
 
         var userId = new ObjectID(req.userId);
         
@@ -179,10 +190,11 @@ app.get("/connections", async (req, res) => {
         .exec(function(err, usrs){
             if(err) throw err;
             var arr= [];
-            
+            var currentUserId = new ObjectID(req.userId);
+
             async.each(usrs, function(user, callback) {
                 let userId, userName;
-                if(user.requestedBy.id == req.usereId) {
+                if(currentUserId.equals(user.requestedBy.id) ) {
                     userId = user.connection.id;
                     userName = user.connection.username;
                 } else {
@@ -197,7 +209,6 @@ app.get("/connections", async (req, res) => {
                 });
               }, function(err){
             });
-
             res.send({data: arr});
         });
 
