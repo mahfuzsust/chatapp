@@ -39,6 +39,20 @@ $(() => {
         }
         postChat(chatMessage)
     });
+
+    $("#accept_chat").click(() => {
+        $("#not_accepted").hide();
+        $("#commenting").show();
+        $("#messages").show();
+        $("#messages").empty();
+        $.get("/accept/" + connectionId);
+        roomUsers[connectionId].isAccepted = true;
+    });
+
+    $("#reject_chat").click(() => {
+        $.get("/reject/" + connectionId);
+        $("#" + connectionId).remove();
+    });
     
     function postChat(chat) {
         $.post("/chats", chat)

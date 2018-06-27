@@ -25,14 +25,6 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.use(cookieParser(app.get('secret')));
-//app.use(cookieEncrypter(app.get('secret')));
-// app.use(session({
-//     secret: app.get('secret'),
-//     name: "chat_app",
-//     proxy: true,
-//     resave: true,
-//     saveUninitialized: true
-// }));
 
 connectDB();
 
@@ -175,6 +167,21 @@ app.get("/users", async (req, res) => {
     }
 });
 
+app.get("/accept/:connection", async (req, res) => {
+    if(!isAuthenticated(req)) {
+        res.redirect('/login');
+    } 
+    console.log(req.params.connection);
+    model.Connection.update(
+        { _id: new ObjectID(req.params.connection) },
+        { $set: { isAccepted: true, accepted: Date.now() } }
+    ).exec(function(err, update) {
+        console.log(err);
+        console.log(update);
+    })
+
+});
+
 app.get("/connections", async (req, res) => {
     if(!isAuthenticated(req)) {
         res.redirect('/login');
@@ -268,22 +275,3 @@ function connectDB() {
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 }
-
-/** 
- mmodel.ConnectedUser.find({
-            $or: [
-                { $and: [
-                    {requestType: "personal"},
-                    {toId: user._id}
-                ] },
-                { $and: [
-                    {requestType: "admin"},
-                    {orgId: { $in: OrgOfAdmin }  }
-                ] }
-            ]
-        })
- .populate('fromId', 'firstName lastName imgSrc')
- .populate('fromOrgId', 'companyName orgDomain logoSrc')
- .populate('orgId', 'companyName orgDomain logoSrc')
- .exec(function (errConnectionRequest, connectionRequest) {
-*/
